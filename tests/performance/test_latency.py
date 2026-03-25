@@ -16,6 +16,8 @@ from openroad_mcp.core.manager import OpenROADManager
 
 
 def percentile(data: list[float], pct: float) -> float:
+    if not data:
+        raise ValueError("Cannot compute percentile of an empty list")
     s = sorted(data)
     return s[min(int(len(s) * pct / 100), len(s) - 1)]
 
@@ -34,6 +36,7 @@ async def test_create_session_latency() -> None:
         p50 = percentile(latencies, 50)
         p95 = percentile(latencies, 95)
         print(f"\ncreate_session: p50={p50:.1f}ms p95={p95:.1f}ms")
+        assert p95 < 10000, f"Session spawn p95={p95:.1f}ms exceeds 10s budget"
     finally:
         await manager.cleanup_all()
 
